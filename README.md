@@ -10,7 +10,6 @@ Duels are simulated here
 ### Installation 
 ``` 
 git clone https://github.com/brandongeren/dueling-sim.git
-cd mean
 cp .env.example .env
 npm install
 mongod
