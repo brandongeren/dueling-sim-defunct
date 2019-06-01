@@ -20,6 +20,7 @@ git clone https://github.com/linnovate/mean
 cd mean
 cp .env.example .env
 npm install
+mongod
 npm start (for development)
 ```
 ### Credits 
