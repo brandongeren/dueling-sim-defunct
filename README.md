@@ -22,13 +22,6 @@ cp .env.example .env
 npm install
 npm start (for development)
 ```
-### Docker based 
-``` 
-git clone https://github.com/linnovate/mean
-cd mean
-cp .env.example .env
-docker-compose up -d
-```
 ### Credits 
 - The MEAN name was coined by Valeri Karpov.
 - Initial concept and development was done by Amos Haviv and sponsered by Linnovate.
