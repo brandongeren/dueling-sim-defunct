@@ -15,6 +15,10 @@ const config = require('./config');
 const passport = require('./passport')
 
 const app = express();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+
+const socket_port = 3000;
 
 if (config.env === 'development') {
   app.use(logger('dev'));
@@ -81,6 +85,19 @@ app.use((err, req, res, next) => {
     message: err.message
   });
   next(err);
+});
+
+io.on('connection', (socket) => {
+  console.log('a user connected');
+
+  socket.on('new-message', (message) => {
+    console.log(message);
+    io.emit('new-message', message);
+  });
+});
+
+http.listen(socket_port, () => {
+  console.log(`listening on *:${socket_port}`);
 });
 
 module.exports = app;
