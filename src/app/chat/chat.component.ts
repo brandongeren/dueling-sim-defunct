@@ -16,7 +16,6 @@ export class ChatComponent implements OnInit {
   ngOnInit() {
     this.chatService
       .getMessages()
-      .filter((message) => message.trim().length > 0)
       .subscribe((message: string) => {
         this.messages.push(message);
       });
