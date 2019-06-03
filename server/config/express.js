@@ -15,10 +15,6 @@ const config = require('./config');
 const passport = require('./passport')
 
 const app = express();
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
-
-const socket_port = 3000;
 
 if (config.env === 'development') {
   app.use(logger('dev'));
@@ -85,55 +81,6 @@ app.use((err, req, res, next) => {
     message: err.message
   });
   next(err);
-});
-
-// chat app functionality follows
-io.on('connection', (socket) => {
-  console.log('a user connected');
-
-  // when an user tries to join a room: add them to it if it exists
-  // if it does not exist, create the room with an empty array of messages
-  socket.on('join', (data) => {
-    socket.join(data.room);
-    chatrooms.find({}).toArray((err, rooms) => {
-      if (err) {
-        console.log(err);
-        return false;
-      }
-
-      count = 0;
-      roos.forEach((room) => {
-        if (room.name == data.room) {
-          count++;
-        }
-      });
-
-      if (count == 0) {
-        chatrooms.insert({name: data.room, messages: []});
-      }
-    })
-  });
-
-  socket.on('message', (data) => {
-    console.log(data.toString());
-    // TODO: add a timestamp to messages
-    io.in(data.room).emit('new-message', {user: data.user, message: data.message});
-    chatrooms.update({name: data.room}, { $push: { messages: { user: data.user, message: data.message} } }, (err, res) => {
-      if (err) {
-        console.log(err);
-        return false;
-      }
-    });
-  });
-
-  socket.on('typing', (data) => {
-    // broadcast to all users except the one typing
-    socket.broadcast.in(data.room).emit('typing', {data: data, isTyping: true});
-  });
-});
-
-http.listen(socket_port, () => {
-  console.log(`socket.io is listening on *:${socket_port}`);
 });
 
 module.exports = app;
