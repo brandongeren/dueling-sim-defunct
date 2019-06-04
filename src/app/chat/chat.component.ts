@@ -19,6 +19,7 @@ export class ChatComponent implements OnInit {
   ngOnInit() {
     // receive messages and display them
     this.chatService.receiveMessage().subscribe((data) => {
+      data.color = "accent";
       this.messages.push(data);
     });
 
@@ -31,7 +32,7 @@ export class ChatComponent implements OnInit {
 	
   sendMessage() {
     this.chatService.sendMessage(this.username, this.message);
-    this.messages.push({ username: this.username, message: this.message });
+    this.messages.push({ username: this.username, message: this.message, color: "primary" });
     this.message = '';
   }
 }

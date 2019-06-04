@@ -1,5 +1,5 @@
 <div *ngFor="let message of messages">
-    <b>{{message.username}}:</b> {{message.message}}
+    <b><font color="{{message.color}}">{{message.username}}:</font></b> {{message.message}}
 </div>
 <input [(ngModel)]="message" (keyup)="$event.keyCode == 13 && sendMessage()" />
 <button (click)="sendMessage()">Send</button>
