@@ -90,7 +90,7 @@ app.use((err, req, res, next) => {
 
 // chat stuff follows
 // TODO: refactor all of this into a new file
-io.on(events.USER_CONNECTED, socket);
+io.on(events.CONNECT, socket);
 
 http.listen(socket_port, () => {
   console.log('socket is listening on port: ' + socket_port);
