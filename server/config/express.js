@@ -13,6 +13,7 @@ const swaggerDocument = require('./swagger.json');
 const routes = require('../routes/index.route');
 const config = require('./config');
 const passport = require('./passport')
+const events = require('../../events');
 
 const app = express();
 const http = require('http').Server(app);
@@ -89,16 +90,16 @@ app.use((err, req, res, next) => {
 
 // chat stuff follows
 // TODO: refactor all of this into a new file
-io.on('connection', (socket) => {
+io.on(events.USER_CONNECTED, (socket) => {
   console.log('an user has connected');
 
-  socket.on('new-message', (data) => {
+  socket.on(events.MESSAGE_SENT, (data) => {
     console.log('new message! from: ' + data.username);
     console.log(data.message);
-    socket.broadcast.emit('message', {message: data.message, username: data.username})
+    socket.broadcast.emit(events.MESSAGE_RECEIVED, {message: data.message, username: data.username})
   });
 
-  socket.on('disconnect', () => {
+  socket.on(events.USER_DISCONNECTED, () => {
     console.log('an user has left')
   });
 });

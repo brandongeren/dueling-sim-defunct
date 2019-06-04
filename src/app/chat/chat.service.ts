@@ -3,6 +3,7 @@ import * as io from 'socket.io-client';
 import * as Rx from 'rxjs/Rx';
 import { Observable } from 'rxjs/Observable';
 import { Message } from './message.model';
+import { MESSAGE_SENT, MESSAGE_RECEIVED } from '../../../events';
 
 @Injectable({
   providedIn: 'root'
@@ -13,12 +14,12 @@ export class ChatService {
   constructor() { }
 
   sendMessage(username, message) {
-    this.socket.emit('new-message', { message: message, username: username });
+    this.socket.emit(MESSAGE_SENT, { message: message, username: username });
   }
 
   receiveMessage() {
     const observable = new Observable<Message>(observer => {
-      this.socket.on('message', (data) => {
+      this.socket.on(MESSAGE_RECEIVED, (data) => {
         observer.next(data);
       });
     });
