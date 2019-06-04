@@ -18,7 +18,7 @@ const events = require('../../events');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-
+const socket = require('./socket');
 const socket_port = 3000;
 
 if (config.env === 'development') {
@@ -90,22 +90,10 @@ app.use((err, req, res, next) => {
 
 // chat stuff follows
 // TODO: refactor all of this into a new file
-io.on(events.USER_CONNECTED, (socket) => {
-  console.log('an user has connected');
-
-  socket.on(events.MESSAGE_SENT, (data) => {
-    console.log('new message! from: ' + data.username);
-    console.log(data.message);
-    socket.broadcast.emit(events.MESSAGE_RECEIVED, {message: data.message, username: data.username})
-  });
-
-  socket.on(events.USER_DISCONNECTED, () => {
-    console.log('an user has left')
-  });
-});
+io.on(events.USER_CONNECTED, socket);
 
 http.listen(socket_port, () => {
   console.log('socket is listening on port: ' + socket_port);
-})
+});
 
 module.exports = app;

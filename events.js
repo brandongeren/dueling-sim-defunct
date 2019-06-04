@@ -5,4 +5,5 @@ module.exports = {
   USER_DISCONNECTED: "disconnect",
   TYPING: "TYPING",
   GENERAL_CHAT: "GENERAL_CHAT",
+  PRIVATE_MESSAGE: "PRIVATE_MESSAGE",
 };

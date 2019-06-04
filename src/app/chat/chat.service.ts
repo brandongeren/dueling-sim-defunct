@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+// TODO: add socket.io to package.json
 import * as io from 'socket.io-client';
 import * as Rx from 'rxjs/Rx';
 import { Observable } from 'rxjs/Observable';
