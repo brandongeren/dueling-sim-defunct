@@ -29,6 +29,10 @@ module.exports = (socket) => {
   // send a message
   socket.on(events.MESSAGE_SENT, (data) => {
     console.log('new message! from: ' + data.username);
+    
+    // abstract out the below stuff to a generalized function to handle chat message filtering
+    // that function will also handle when users are muted
+    // in addition, that function can handle slash commands
     // remove zalgo
     message = message.replace(/[\u0300-\u036f\u0483-\u0489\u0610-\u0615\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06ED\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]{3,}/g, '');
     // remove alternative space characters, and others
@@ -40,7 +44,11 @@ module.exports = (socket) => {
 
   socket.on(events.PRIVATE_MESSAGE, ({receiver, sender}) => {
     if (receiver in connectedUsers) {
-      const newChat = createChat
+      
+    } else {
+      // TODO: send error message to the front end informing the sender that the receiver is offline
+      // this follows the pokemon showdown style of informing that receiver is offline
+      // duelingbook takes a different approach, where as soon as the user signs off 
     }
   });
 };

@@ -18,7 +18,7 @@ const events = require('../../events');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-const socket = require('./socket');
+const socket = require('../chat/socket');
 const socket_port = 3000;
 
 if (config.env === 'development') {
