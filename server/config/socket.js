@@ -2,6 +2,11 @@ const events = require('../../events');
 
 let connectedUsers = { }
 
+// TODO: make a new file (chat.js maybe?) for parsing chat messages
+// model it after this: https://github.com/Zarel/Pokemon-Showdown/blob/master/server/chat.js
+// cmd + f "command parser"
+// read the documentation there
+
 module.exports = (socket) => {
   console.log('Socket ID: ' + socket.id);
 
@@ -12,12 +17,6 @@ module.exports = (socket) => {
     connectedUsers = addUser(connectedUsers, user);
   });
 
-  socket.on(events.MESSAGE_SENT, (data) => {
-    console.log('new message! from: ' + data.username);
-    console.log(data.message);
-    socket.broadcast.emit(events.MESSAGE_RECEIVED, {message: data.message, username: data.username})
-  });
-
   socket.on(events.DISCONNECT, () => {
     let username = socket.user && socket.user.username;
     console.log(username + ' has left');
@@ -25,6 +24,24 @@ module.exports = (socket) => {
     // the line is useful in production though
     // TODO: find a solution to this problem
     // connectedUsers = removeUser(connectedUsers, socket.user);
+  });
+
+  // send a message
+  socket.on(events.MESSAGE_SENT, (data) => {
+    console.log('new message! from: ' + data.username);
+    // remove zalgo
+    message = message.replace(/[\u0300-\u036f\u0483-\u0489\u0610-\u0615\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06ED\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]{3,}/g, '');
+    // remove alternative space characters, and others
+    message = message.replace(/[\u115f\u1160\u239b-\u23b9]/g, '');
+    
+    console.log(data.message);
+    socket.broadcast.emit(events.MESSAGE_RECEIVED, {message: data.message, username: data.username})
+  });
+
+  socket.on(events.PRIVATE_MESSAGE, ({receiver, sender}) => {
+    if (receiver in connectedUsers) {
+      const newChat = createChat
+    }
   });
 };
 
