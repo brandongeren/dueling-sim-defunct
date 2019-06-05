@@ -15,7 +15,7 @@
         <tr>
           <td>
             <mat-form-field>
-              <input matInput placeholder="Password" [(ngModel)]="password" type="password" name="password" required>
+              <input matInput placeholder="Password" [(ngModel)]="password" type="password" name="password" required (keyup)="$event.keyCode == 13 && login()">
             </mat-form-field>
           </td>
         </tr>
