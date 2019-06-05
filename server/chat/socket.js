@@ -1,6 +1,10 @@
 const events = require('../../events');
+import { createRoom } from './factories';
 
-let connectedUsers = { }
+let connectedUsers = { };
+let general = createRoom({ name: "general", });
+let rooms = { };
+rooms[general.name] = general;
 
 // TODO: make a new file (chat.js maybe?) for parsing chat messages
 // model it after this: https://github.com/Zarel/Pokemon-Showdown/blob/master/server/chat.js
@@ -11,10 +15,11 @@ module.exports = (socket) => {
   console.log('Socket ID: ' + socket.id);
 
   socket.on(events.USER_CONNECTED, (user) => {
-    console.log(user.username + ' has joined!');
-    socket.user = user;
-    user.socketId = socket.id;
-    connectedUsers = addUser(connectedUsers, user);
+    let newUser = user.user;
+    console.log(newUser.username + ' has joined!');
+    socket.user = newUser;
+    newUser.socketId = socket.id;
+    connectedUsers = addUser(connectedUsers, newUser);
   });
 
   socket.on(events.DISCONNECT, () => {
@@ -28,8 +33,9 @@ module.exports = (socket) => {
 
   // send a message
   socket.on(events.MESSAGE_SENT, (data) => {
-    console.log('new message! from: ' + data.username);
-    
+    let from = data.from;
+    console.log('new message! from: ' + from.username);
+    let message = data.message;
     // abstract out the below stuff to a generalized function to handle chat message filtering
     // that function will also handle when users are muted
     // in addition, that function can handle slash commands
@@ -38,13 +44,26 @@ module.exports = (socket) => {
     // remove alternative space characters, and others
     message = message.replace(/[\u115f\u1160\u239b-\u23b9]/g, '');
     
-    console.log(data.message);
-    socket.broadcast.emit(events.MESSAGE_RECEIVED, {message: data.message, username: data.username})
+    console.log(message);
+    // TODO: change this to a socket.to().emit()
+    // socket.to allows you to have different channels and shit
+    // oh and you can also do private messages that way
+    // more info: https://socket.io/docs/emit-cheatsheet/
+    // TODO: BIG TODO
+    // make the code so much simpler this way holy hell
+    socket.emit(`${events.MESSAGE_RECEIVED}-${data.channelId}`, { message: message, from: from, });
   });
 
-  socket.on(events.PRIVATE_MESSAGE, ({receiver, sender}) => {
+  socket.on(events.PRIVATE_MESSAGE, ({to, from}) => {
     if (receiver in connectedUsers) {
-      
+      // TODO: this is a shitty way of naming the chat
+      // if users have '&' in their names, then it could cause anti-uniqueness problems
+      // ideally we eventually refactor dm's into being distinct from normal conversation
+      // pokemon showdown and db do that
+      let name = from.username + ' & ' + to.username;
+      let room = createRoom({users = [to, from], pm = true, name = name});
+      rooms[name] = room;
+      socket.emit(events.PRIVATE_MESSAGE, room);
     } else {
       // TODO: send error message to the front end informing the sender that the receiver is offline
       // this follows the pokemon showdown style of informing that receiver is offline
