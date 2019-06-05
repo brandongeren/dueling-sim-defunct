@@ -1,5 +1,6 @@
 const events = require('../../events');
 import { createRoom } from './factories';
+import { isObject } from 'util';
 
 let connectedUsers = { };
 let general = createRoom({ name: "general", });
@@ -23,12 +24,26 @@ module.exports = (socket) => {
   });
 
   socket.on(events.DISCONNECT, () => {
-    let username = socket.user && socket.user.username;
+    let username;
+    if (socket.user) {
+      username = socket.user.username;
+      connectedUsers = removeUser(connectedUsers, socket.user);
+      socket.emit(USER_DISCONNECTED, connectedUsers);
+    }
     console.log(username + ' has left');
     // the below line crashes the server if it is restarted 
     // the line is useful in production though
     // TODO: find a solution to this problem
     // connectedUsers = removeUser(connectedUsers, socket.user);
+  });
+
+  socket.on(events.LOGOUT, () => {
+    if (socket.user) {
+      connectedUsers = removeUser(connectedUsers, socket.user);
+      socket.emit(USER_DISCONNECTED, connectedUsers);
+      console.log(socket.user.username + ' has logged out');
+      delete socket.user; 
+    }
   });
 
   // send a message
@@ -61,9 +76,11 @@ module.exports = (socket) => {
       // ideally we eventually refactor dm's into being distinct from normal conversation
       // pokemon showdown and db do that
       let name = from.username + ' & ' + to.username;
-      let room = createRoom({users = [to, from], pm = true, name = name});
+      const room = createRoom({users = [to, from], pm = true, name = name});
       rooms[name] = room;
-      socket.emit(events.PRIVATE_MESSAGE, room);
+      const toSocket = connectedUsers[to.user.username];
+      socket.to(toSocket).emit(events.PRIVATE_MESSAGE, room);
+      socket.to(socket.id).emit(events.PRIVATE_MESSAGE, room);
     } else {
       // TODO: send error message to the front end informing the sender that the receiver is offline
       // this follows the pokemon showdown style of informing that receiver is offline
