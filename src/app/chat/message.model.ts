@@ -1,5 +1,6 @@
 export interface Message {
-    username: String,
+    // TODO: create an user type
+    from: any,
     message: String,
     color?: String,
 }

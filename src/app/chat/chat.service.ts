@@ -13,12 +13,12 @@ export class ChatService {
   private socket = io('http://localhost:3000');
   constructor() { }
 
-  userConnect(username) {
-    this.socket.emit(USER_CONNECTED, { username: username });
+  userConnect(user) {
+    this.socket.emit(USER_CONNECTED, { user: user });
   }
 
-  sendMessage(username, message) {
-    this.socket.emit(MESSAGE_SENT, { message: message, username: username });
+  sendMessage(user, message) {
+    this.socket.emit(MESSAGE_SENT, { message: message, from: user });
   }
 
   receiveMessage() {
