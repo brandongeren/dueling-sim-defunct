@@ -20,6 +20,7 @@ module.exports = (socket) => {
     socket.user = newUser;
     newUser.socketId = socket.id;
     connectedUsers = addUser(connectedUsers, newUser);
+    socket.emit(events.UPDATE_USERS, connectedUsers);
   });
 
   socket.on(events.DISCONNECT, () => {
@@ -50,21 +51,25 @@ module.exports = (socket) => {
     // more info: https://socket.io/docs/emit-cheatsheet/
     // TODO: BIG TODO
     // make the code so much simpler this way holy hell
-    socket.emit(`${events.MESSAGE_RECEIVED}-${data.channelId}`, { message: message, from: from, });
+    socket.emit(events.MESSAGE_RECEIVED, { message: message, from: from, });
+    // TODO: doing socket.emit and socket.broadcast.emit is messy
+    // you can replace this with io.emit if you find a way to access io in this file
+    // do that
+    socket.broadcast.emit(events.MESSAGE_RECEIVED, { message: message, from: from, });
   });
 
-  socket.on(events.PRIVATE_MESSAGE, ({to, from}) => {
+  socket.on(events.PRIVATE_MESSAGE, (message) => {
     if (receiver in connectedUsers) {
       // TODO: this is a shitty way of naming the chat
       // if users have '&' in their names, then it could cause anti-uniqueness problems
       // ideally we eventually refactor dm's into being distinct from normal conversation
       // pokemon showdown and db do that
-      let name = from.username + ' & ' + to.username;
-      const room = createRoom({users: [to, from], pm: true, name: name});
-      rooms[name] = room;
-      const toSocket = connectedUsers[to.user.username];
-      socket.to(toSocket).emit(events.PRIVATE_MESSAGE, room);
-      socket.to(socket.id).emit(events.PRIVATE_MESSAGE, room);
+      // let name = from.username + ' & ' + to.username;
+      // const room = createRoom({users: [to, from], pm: true, name: name});
+      // rooms[name] = room;
+      const toSocket = connectedUsers[message.to.user.username];
+      socket.to(toSocket).emit(events.PRIVATE_MESSAGE, messsage);
+      socket.to(socket.id).emit(events.PRIVATE_MESSAGE, message);
     } else {
       // TODO: send error message to the front end informing the sender that the receiver is offline
       // this follows the pokemon showdown style of informing that receiver is offline
@@ -105,7 +110,7 @@ function disconnectUser(socket, logout=false) {
   if (socket.user) {
     username = socket.user.username;
     connectedUsers = removeUser(connectedUsers, socket.user);
-    socket.emit(events.USER_DISCONNECTED, connectedUsers);
+    socket.emit(events.UPDATE_USERS, connectedUsers);
     delete socket.user;
   }
   if (logout) {
