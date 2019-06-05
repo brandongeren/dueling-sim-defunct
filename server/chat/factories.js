@@ -32,6 +32,4 @@ function createRoom({messages = [], name, users = [], pm = false} = {}) {
 	return room;
 }
 
-module.exports = {
-	createRoom,
-}
+module.exports = createRoom;

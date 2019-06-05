@@ -1,6 +1,5 @@
 const events = require('../../events');
-import { createRoom } from './factories';
-import { isObject } from 'util';
+const createRoom = require('./factories');
 
 let connectedUsers = { };
 let general = createRoom({ name: "general", });
@@ -76,7 +75,7 @@ module.exports = (socket) => {
       // ideally we eventually refactor dm's into being distinct from normal conversation
       // pokemon showdown and db do that
       let name = from.username + ' & ' + to.username;
-      const room = createRoom({users = [to, from], pm = true, name = name});
+      const room = createRoom({users: [to, from], pm: true, name: name});
       rooms[name] = room;
       const toSocket = connectedUsers[to.user.username];
       socket.to(toSocket).emit(events.PRIVATE_MESSAGE, room);
