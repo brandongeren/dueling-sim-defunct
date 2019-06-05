@@ -27,7 +27,7 @@ module.exports = (socket) => {
     if (socket.user) {
       username = socket.user.username;
       connectedUsers = removeUser(connectedUsers, socket.user);
-      socket.emit(USER_DISCONNECTED, connectedUsers);
+      socket.emit(events.USER_DISCONNECTED, connectedUsers);
     }
     console.log(username + ' has left');
     // the below line crashes the server if it is restarted 
