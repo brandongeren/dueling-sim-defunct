@@ -5,11 +5,16 @@ import { Subject } from 'rxjs/Subject';
 
 import { TokenStorage } from './token.storage';
 import { TooltipComponent } from '@angular/material';
+import { ChatService } from '../chat/chat.service';
 
 @Injectable()
 export class AuthService {
 
-  constructor(private http : HttpClient, private token: TokenStorage) {}
+  constructor(
+    private http : HttpClient, 
+    private token: TokenStorage, 
+    private chatService: ChatService
+  ) {}
 
   public $userSource = new Subject<any>();
 
@@ -68,6 +73,7 @@ export class AuthService {
   signOut(): void {
     this.token.signOut();
     this.setUser(null);
+    this.chatService.logout();
     delete (<any>window).user;
   }
 }

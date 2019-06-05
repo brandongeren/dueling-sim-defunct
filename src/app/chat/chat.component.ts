@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { ChatService } from './chat.service';
 import { Message } from './message.model';
-import { userInfo } from 'os';
 
 @Component({
   selector: 'app-chat',

@@ -3,12 +3,13 @@ import { Injectable } from '@angular/core';
 import * as io from 'socket.io-client';
 import { Observable } from 'rxjs/Observable';
 import { Message } from './message.model';
-import { MESSAGE_SENT, MESSAGE_RECEIVED, USER_CONNECTED } from '../../../events';
+import { MESSAGE_SENT, MESSAGE_RECEIVED, USER_CONNECTED, LOGOUT } from '../../../events';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
+  [x: string]: any;
 
   private socket = io('http://localhost:3000');
   constructor() { }
@@ -28,5 +29,9 @@ export class ChatService {
       });
     });
     return observable;
+  }
+
+  logout() {
+    this.socket.emit(LOGOUT);
   }
 }
