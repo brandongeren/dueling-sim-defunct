@@ -12,6 +12,7 @@ export class LoginComponent implements OnInit {
 
   constructor(private authService: AuthService, private router: Router) { }
 
+  // TODO: login using username instead of email
   email: string;
   password: string;
 
