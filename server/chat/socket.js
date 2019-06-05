@@ -39,7 +39,7 @@ module.exports = (socket) => {
   socket.on(events.LOGOUT, () => {
     if (socket.user) {
       connectedUsers = removeUser(connectedUsers, socket.user);
-      socket.emit(USER_DISCONNECTED, connectedUsers);
+      socket.emit(events.USER_DISCONNECTED, connectedUsers);
       console.log(socket.user.username + ' has logged out');
       delete socket.user; 
     }
