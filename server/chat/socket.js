@@ -23,27 +23,11 @@ module.exports = (socket) => {
   });
 
   socket.on(events.DISCONNECT, () => {
-    let username;
-    if (socket.user) {
-      username = socket.user.username;
-      connectedUsers = removeUser(connectedUsers, socket.user);
-      socket.emit(events.USER_DISCONNECTED, connectedUsers);
-    }
-    console.log(username + ' has left');
-    // the below line crashes the server if it is restarted 
-    // the line is useful in production though
-    // TODO: find a solution to this problem
-    // connectedUsers = removeUser(connectedUsers, socket.user);
+    disconnectUser(socket);
   });
 
   socket.on(events.LOGOUT, () => {
-    let username;
-    if (socket.user) {
-      connectedUsers = removeUser(connectedUsers, socket.user);
-      socket.emit(events.USER_DISCONNECTED, connectedUsers);
-      delete socket.user; 
-    }
-    console.log(username + ' has logged out');
+    disconnectUser(socket, true);
   });
 
   // send a message
@@ -114,4 +98,23 @@ function removeUser(users, user) {
 // Check if an user exists in the users object
 function isUser(users, user) {
   return user.username in users;
+}
+
+function disconnectUser(socket, logout=false) {
+  let username;
+  if (socket.user) {
+    username = socket.user.username;
+    connectedUsers = removeUser(connectedUsers, socket.user);
+    socket.emit(events.USER_DISCONNECTED, connectedUsers);
+    delete socket.user;
+  }
+  if (logout) {
+    console.log(username + ' has logged out');
+  } else {
+    console.log(username + ' has left');
+  }
+  // the below line crashes the server if it is restarted 
+  // the line is useful in production though
+  // TODO: find a solution to this problem
+  // connectedUsers = removeUser(connectedUsers, socket.user);
 }
