@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import * as io from 'socket.io-client';
 import { Observable } from 'rxjs/Observable';
 import { Message } from './message.model';
-import { MESSAGE_SENT, MESSAGE_RECEIVED, USER_CONNECTED, LOGOUT } from '../../../events';
+import * as events from '../../../events';
 
 @Injectable({
   providedIn: 'root'
@@ -15,16 +15,33 @@ export class ChatService {
   constructor() { }
 
   userConnect(user) {
-    this.socket.emit(USER_CONNECTED, { user: user });
+    this.socket.emit(events.USER_CONNECTED, { user: user });
   }
 
   sendMessage(user, message) {
-    this.socket.emit(MESSAGE_SENT, { message: message, from: user });
+    this.socket.emit(events.MESSAGE_SENT, { message: message, from: user });
   }
 
-  receiveMessage() {
+  sendPrivateMessage(to, from, message) {
+    console.log('sending private message');
+    console.log('from: ' + from.username);
+    console.log('to: ' + to.username);
+    console.log(message);
+    this.socket.emit(events.PRIVATE_MESSAGE, { message: message, to: to, from: from, });
+  }
+
+  getMessages() {
     const observable = new Observable<Message>(observer => {
-      this.socket.on(MESSAGE_RECEIVED, (data) => {
+      this.socket.on(events.MESSAGE_RECEIVED, (data) => {
+        observer.next(data);
+      });
+    });
+    return observable;
+  }
+
+  getPrivateMessages() {
+    const observable = new Observable<any>(observer => {
+      this.socket.on(events.PRIVATE_MESSAGE, (data) => {
         observer.next(data);
       });
     });
@@ -32,6 +49,15 @@ export class ChatService {
   }
 
   logout() {
-    this.socket.emit(LOGOUT);
+    this.socket.emit(events.LOGOUT);
+  }
+
+  getUsers() {
+    const observable = new Observable<any>(observer => {
+      this.socket.on(events.UPDATE_USERS, (data) => {
+        observer.next(data);
+      });
+    });
+    return observable;
   }
 }

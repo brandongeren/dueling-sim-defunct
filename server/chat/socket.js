@@ -19,8 +19,8 @@ module.exports = (socket) => {
     console.log(newUser.username + ' has joined!');
     socket.user = newUser;
     newUser.socketId = socket.id;
-    connectedUsers = addUser(connectedUsers, newUser);
-    socket.emit(events.UPDATE_USERS, connectedUsers);
+    connectedUsers = addUser(connectedUsers, newUser, socket);
+    socket.emit(events.UPDATE_USERS, Object.keys(connectedUsers));
   });
 
   socket.on(events.DISCONNECT, () => {
@@ -58,8 +58,12 @@ module.exports = (socket) => {
     socket.broadcast.emit(events.MESSAGE_RECEIVED, { message: message, from: from, });
   });
 
-  socket.on(events.PRIVATE_MESSAGE, (message) => {
-    if (receiver in connectedUsers) {
+  socket.on(events.PRIVATE_MESSAGE, (data) => {
+    if (connectedUsers[data.to.username]) {
+      console.log('new private message');
+      console.log('from: ' + data.from.username);
+      console.log('to: ' + data.to.username);
+      console.log(data.message);
       // TODO: this is a shitty way of naming the chat
       // if users have '&' in their names, then it could cause anti-uniqueness problems
       // ideally we eventually refactor dm's into being distinct from normal conversation
@@ -67,9 +71,9 @@ module.exports = (socket) => {
       // let name = from.username + ' & ' + to.username;
       // const room = createRoom({users: [to, from], pm: true, name: name});
       // rooms[name] = room;
-      const toSocket = connectedUsers[message.to.user.username];
-      socket.to(toSocket).emit(events.PRIVATE_MESSAGE, messsage);
-      socket.to(socket.id).emit(events.PRIVATE_MESSAGE, message);
+      const toSocket = connectedUsers[data.to.username].socket;
+      toSocket.emit(events.PRIVATE_MESSAGE, data);
+      socket.emit(events.PRIVATE_MESSAGE, data);
     } else {
       // TODO: send error message to the front end informing the sender that the receiver is offline
       // this follows the pokemon showdown style of informing that receiver is offline
@@ -79,10 +83,10 @@ module.exports = (socket) => {
 };
 
 // Add an user to the connected users object
-function addUser(users, user) {
+function addUser(users, user, socket) {
   if (!users[user.username]) {
     let updatedUsers = Object.assign({}, users);
-    updatedUsers[user.username] = user;
+    updatedUsers[user.username] = {user: user, socket: socket};
     return updatedUsers;
   } else {
     return users;
@@ -110,7 +114,7 @@ function disconnectUser(socket, logout=false) {
   if (socket.user) {
     username = socket.user.username;
     connectedUsers = removeUser(connectedUsers, socket.user);
-    socket.emit(events.UPDATE_USERS, connectedUsers);
+    socket.emit(events.UPDATE_USERS, Object.keys(connectedUsers));
     delete socket.user;
   }
   if (logout) {
